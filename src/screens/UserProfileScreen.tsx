@@ -8,6 +8,7 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { useAuth } from '../context/AuthContext';
 
 import BottomNav from '../components/BottomNav';
 import LinearGradient from 'react-native-linear-gradient';
@@ -26,90 +27,116 @@ const downloads = [
   require('../assets/Moviephoto.jpg'),
 ];
 
-const UserProfileScreen = ({ navigation }: { navigation: NativeStackNavigationProp<any> }) => (
-  <View style={styles.container}>
-    <LinearGradient
-      colors={[
-        'rgba(75, 6, 2, 1)',
-        'rgba(56, 18, 11, 1)',
-        'rgba(76, 14, 2, 1)',
-        'rgba(113, 22, 4, 1)',
-        'rgba(106, 4, 29, 1)',
-      ]}
-      start={{ x: 0, y: 0 }}
-      end={{ x: 1, y: 1 }}
-      style={styles.topSection}
-    >
-      <View style={styles.avatarCircle}>
-        <Image
-          source={require('../assets/Aman-5.jpg')}
-          style={styles.avatarImage}
-        />
+const UserProfileScreen = ({ navigation }: { navigation: NativeStackNavigationProp<any> }) => {
+  const { user, logout } = useAuth();
+
+  return (
+    <View style={styles.container}>
+      <LinearGradient
+        colors={[
+          'rgba(75, 6, 2, 1)',
+          'rgba(56, 18, 11, 1)',
+          'rgba(76, 14, 2, 1)',
+          'rgba(113, 22, 4, 1)',
+          'rgba(106, 4, 29, 1)',
+        ]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={styles.topSection}
+      >
+        <View style={styles.avatarCircle}>
+          <Image
+            source={user?.avatar ? { uri: user.avatar } : require('../assets/Aman-5.jpg')}
+            style={styles.avatarImage}
+          />
+        </View>
+        <TouchableOpacity
+          style={styles.penIconContainer}
+          onPress={() => navigation.navigate('EditProfile')}
+        >
+          <Image
+            source={require('../assets/editPencil.png')}
+            style={styles.penIcon}
+          />
+        </TouchableOpacity>
+        <Text style={styles.userName}>{user?.name || 'User_name'}</Text>
+        <Text style={styles.email}>{user?.email || 'Not logged in'}</Text>
+      </LinearGradient>
+      {/* Bottom Section */}
+      <View style={styles.profileSection}>
+        <Text style={styles.sectionTitle}>Profile</Text>
+
+        {/* Login ID */}
+        <TouchableOpacity
+          style={styles.row}
+          onPress={() => {
+            if (!user) navigation.navigate('SignIn');
+          }}
+        >
+          <Image source={require('../assets/login.png')} style={styles.icon} />
+          <Text style={styles.rowText}>{user ? 'Logged in as' : 'Login / Sign Up'}</Text>
+          <Text style={styles.rowSubText}>{user?.email || ''}</Text>
+        </TouchableOpacity>
+
+        {/* Watch History */}
+        <Text style={styles.subSectionTitle}>Watch History</Text>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          style={styles.horizontalScroll}
+        >
+          {movies.map((img, i) => (
+            <Image key={i} source={img} style={styles.movieImage} />
+          ))}
+        </ScrollView>
+
+        {/* Downloads */}
+        <Text style={styles.subSectionTitle}>Downloads</Text>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          style={styles.horizontalScroll}
+        >
+          {downloads.map((img, i) => (
+            <Image key={i} source={img} style={styles.movieImage} />
+          ))}
+        </ScrollView>
+
+        {/* Delete Account */}
+        <TouchableOpacity
+          style={styles.row}
+          onPress={() => {
+            // TODO: call delete account endpoint if desired
+          }}
+        >
+          <Image source={require('../assets/trash.png')} style={styles.icon} />
+          <Text style={styles.rowText}>Delete Account</Text>
+        </TouchableOpacity>
+
+        {/* Logout */}
+        {user ? (
+          <TouchableOpacity
+            style={styles.row}
+            onPress={() => {
+              logout();
+            }}
+          >
+            <Image source={require('../assets/logout.png')} style={styles.icon} />
+            <Text style={styles.rowText}>Log out</Text>
+          </TouchableOpacity>
+        ) : (
+          <TouchableOpacity style={styles.row} onPress={() => navigation.navigate('SignUp')}>
+            <Image source={require('../assets/logout.png')} style={styles.icon} />
+            <Text style={styles.rowText}>Sign up</Text>
+          </TouchableOpacity>
+        )}
       </View>
-      <TouchableOpacity
-        style={styles.penIconContainer}
-        onPress={() => navigation.navigate('EditProfile')}
-      >
-        <Image
-          source={require('../assets/editPencil.png')}
-          style={styles.penIcon}
-        />
-      </TouchableOpacity>
-      <Text style={styles.userName}>User_name</Text>
-      <Text style={styles.email}>abc123@gmail.com</Text>
-    </LinearGradient>
-    {/* Bottom Section */}
-    <View style={styles.profileSection}>
-      <Text style={styles.sectionTitle}>Profile</Text>
 
-      {/* Login ID */}
-      <View style={styles.row}>
-        <Image source={require('../assets/login.png')} style={styles.icon} />
-        <Text style={styles.rowText}>Login Id</Text>
-        <Text style={styles.rowSubText}>abc123@gmail.com</Text>
-      </View>
-
-      {/* Watch History */}
-      <Text style={styles.subSectionTitle}>Watch History</Text>
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        style={styles.horizontalScroll}
-      >
-        {movies.map((img, i) => (
-          <Image key={i} source={img} style={styles.movieImage} />
-        ))}
-      </ScrollView>
-
-      {/* Downloads */}
-      <Text style={styles.subSectionTitle}>Downloads</Text>
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        style={styles.horizontalScroll}
-      >
-        {downloads.map((img, i) => (
-          <Image key={i} source={img} style={styles.movieImage} />
-        ))}
-      </ScrollView>
-
-      {/* Delete Account */}
-      <TouchableOpacity style={styles.row}>
-        <Image source={require('../assets/trash.png')} style={styles.icon} />
-        <Text style={styles.rowText}>Delete Account</Text>
-      </TouchableOpacity>
-
-      {/* Logout */}
-      <TouchableOpacity style={styles.row}>
-        <Image source={require('../assets/logout.png')} style={styles.icon} />
-        <Text style={styles.rowText}>Log out</Text>
-      </TouchableOpacity>
+      {/* Bottom Nav */}
+      <BottomNav />
     </View>
-
-    {/* Bottom Nav */}
-    <BottomNav />
-  </View>
-);
+  );
+};
 
 const styles = StyleSheet.create({
   container: {
